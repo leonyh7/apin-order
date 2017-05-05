@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>航班列表</title>
+	<style type="text/css">
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			margin: 0;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.tab {
+			display: flex;
+			list-style-type: none;
+			height: 1rem;
+			line-height: 1rem;
+			position: relative;
+			font-size: 16px;
+		}
+
+		[data-dpr="2"] .tab {
+			font-size: 32px;
+		}
+
+		[data-dpr="3"] .tab {
+			font-size: 48px;
+		}
+
+		.tab .item {
+			flex: auto;
+			text-align: center;
+			border-bottom: 0.06rem solid #eee;
+		}
+
+		.tab .item.active {
+			color: #1aad19;
+		}
+
+
+		.tab .indicators {
+			content: '';
+			width: 33.33%;
+			position: absolute;
+			left: 0;
+			bottom: 0;
+			background-color: #1aad19;
+			height: 0.06rem;
+			transition: left ease .3s;
+		}
+
+		.page {
+			padding: .2rem;
+			flex: 1;
+			overflow-y: auto;
+			display: none;
+		}
+
+		.page.active {
+			display: block;
+		}
+
+		.list {
+			box-shadow: 0 1px 3px 1px rgba(0, 0, 0, .2);
+			margin-top: 0;
+			margin-bottom: 0.2rem;
+			display: flex;
+			overflow: hidden;
+		}
+
+		[data-dpr="2"] .list {
+			box-shadow: 0 2px 6px 2px rgba(0, 0, 0, .2);
+		}
+
+		[data-dpr="3"] .list {
+			box-shadow: 0 2px 6px 2px rgba(0, 0, 0, .2);
+		}
+
+		.page .list:last-child {
+			margin-bottom: 0;
+		}
+
+
+		.list-item {
+			white-space: nowrap;
+			width: 100%;
+			font-size: 0;
+			transition: transform ease .3s;
+		}
+
+		.list.swipeleft .list-item {
+			transform: translateX(-2rem);
+		}
+
+		.list-content {
+			display: inline-block;
+			width: 100%;
+			padding: 0.13rem 0.3rem;
+			box-sizing: border-box;
+			font-size: 14px;
+		}
+
+		[data-dpr="2"] .list-content {
+			font-size: 28px;
+		}
+
+		[data-dpr="3"] .list-content {
+			font-size: 42px;
+		}
+
+		.list .delete {
+			display: inline-block;
+			width: 2rem;
+			height: 100%;
+			vertical-align: top;
+			font-size: 14px;
+			box-sizing: border-box;
+			color: white;
+			border: none;
+			background-color: red;
+		}
+
+		[data-dpr="2"] .list .delete {
+			font-size: 28px;
+		}
+
+		[data-dpr="3"] .list .delete {
+			font-size: 42px;
+		}
+
+		.row {
+			display: -webkit-box;
+			display: -ms-flexbox;
+			display: flex;
+		}
+
+		.row .col:first-child {
+			-webkit-box-flex: 1;
+			-ms-flex: 1;
+			flex: 1;
+		}
+
+		.row .col:nth-child(2) {
+			-webkit-box-flex: 2;
+			-ms-flex: 2;
+			flex: 2;
+		}
+
+		.row .col img {
+			vertical-align: middle;
+		}
+	</style>
+	<script type="text/javascript" src="./script/flexible.js"></script>
+</head>
+
+<body>
+	<div class="tab">
+		<div class="item active">已出票</div>
+		<div class="item">未出票</div>
+		<div class="item">已取消</div>
+		<div class="indicators"></div>
+	</div>
+
+	<section class="page active">
+	</section>
+	<section class="page">
+	</section>
+	<section class="page">
+	</section>
+	<script type="text/javascript" src="./script/zepto.min.js"></script>
+	<script>
+		$(document).ready(function () {
+			//侧滑显示删除按钮
+			var expansion = null; //是否存在展开的list
+			var index = 0; //当前tab
+			var x, y, X, Y, swipeX, swipeY;
+			// 字体大小
+			var size = $("html").css('fontSize');
+			size = size.substring(0, size.length - 2);
+			var tabs = [{
+				name: "已出票",
+				init: false,
+				orderList: [],
+				isLoaded: false
+			}, {
+				name: "未出票",
+				init: false,
+				orderList: [],
+				isLoaded: false
+			}, {
+				name: "已取消",
+				init: false,
+				orderList: [],
+				isLoaded: false
+			}]
+			// 获取订单列表
+			function getOrderList() {
+				$.ajax({
+					type: 'GET',
+					url: '/api/orders',
+					data: { status: 1 },
+					dataType: 'json',
+					timeout: 300,
+					success: function (data) {
+						if (data.orderList && data.orderList.length > 0) {
+							tabs[index].orderList.push(data.orderList);
+
+							data.orderList.forEach(function (item) {
+								let order = `<div class="list">
+									<div class="list-item">
+										<div class="list-content">
+											<div class="row">
+												<div class="col">订单号：</div>
+												<div class="col">${item.orderId}</div>
+											</div>
+											<div class="row">
+												<div class="col">订单时间：</div>
+												<div class="col">${item.time}</div>
+											</div>
+											<div class="row">
+												<div class="col">
+													${item.start}
+													<img src="img/plane.png" /> ${item.end}
+												</div>
+											</div>
+											<div class="row">
+												<div class="col">人数：</div>
+												<div class="col">${item.number}人</div>
+											</div>
+											<div class="row">
+												<div class="col">${item.status}</div>
+											</div>
+										</div>
+										<button type="button" class="delete">删除</button>
+									</div>
+								</div>`;
+								$(".page").eq(index).append(order)
+							});
+						}
+					},
+					error: function (xhr, type) {
+						alert('Ajax error!')
+					}
+				})
+			}
+			//收缩删除键
+			function setExpansion() {
+				if (expansion) {   //判断是否展开，如果展开则收起
+					expansion.classList.remove("swipeleft");
+				}
+			}
+			getOrderList();
+			tabs[index].init = true;
+
+			$(".page").on('touchstart', '.list', function (event) {
+				x = event.changedTouches[0].pageX;
+				y = event.changedTouches[0].pageY;
+				swipeX = true;
+				swipeY = true;
+			});
+			$(".page").on('touchmove', '.list', function (event) {
+				X = event.changedTouches[0].pageX;
+				Y = event.changedTouches[0].pageY;
+				// 左右滑动
+				if (swipeX && Math.abs(X - x) - Math.abs(Y - y) > 0) {
+					// 阻止事件冒泡
+					event.stopPropagation();
+					setExpansion();
+					if (X - x > 10) {   //右滑
+						event.preventDefault();
+						this.classList.remove("swipeleft");    //右滑收起
+					}
+					if (x - X > 10) {   //左滑
+						event.preventDefault();
+						this.classList.add("swipeleft");   //左滑展开
+						expansion = this;
+					}
+					swipeY = false;
+				}
+				// 上下滑动
+				if (swipeY && Math.abs(X - x) - Math.abs(Y - y) < 0) {
+					// swipeX = false;
+				}
+			});
+
+			// 切换tab
+			$(".tab .item").on('click', function () {
+				setExpansion();
+				index = $(this).index();
+				$(".tab .item").removeClass('active');
+				$(this).addClass('active').siblings('.indicators').css({ left: index * 33.33 + '%' });
+				$(".page").removeClass('active').eq(index).addClass('active');
+				// 初始化
+				if (!tabs[index].init) {
+					getOrderList();
+					tabs[index].init = true;
+				}
+			})
+
+			// 滚动到底部
+			$(".page").on('scroll', function () {
+				var bottom = Math.ceil(size * 0.3);
+				var scrollTop = $(this)[0].scrollTop;
+				var scrollHeight = $(this)[0].scrollHeight;
+				var windowHeight = $(this).height();
+				if (scrollHeight - scrollTop - windowHeight < bottom) {
+					getOrderList();
+				}
+
+			})
+		})
+	</script>
+</body>
+
+</html>

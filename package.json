@@ -1,0 +1,24 @@
+{
+  "devDependencies": {
+    "puer-mock": "^1.2.0"
+  },
+  "name": "weui",
+  "version": "1.0.0",
+  "main": "_mockserver.js",
+  "dependencies": {
+    "commander": "^2.9.0",
+    "graceful-readlink": "^1.0.1",
+    "lib-flexible": "^0.3.2",
+    "mockjs": "^1.0.1-beta3",
+    "puer-mock": "^1.2.0",
+    "strip-json-comments": "^2.0.1",
+    "zepto": "^1.2.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "puer -a _mockserver.js -p 8000"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

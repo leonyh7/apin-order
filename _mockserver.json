@@ -1,0 +1,45 @@
+// _mockserver.json - mock 接口的配置文件
+// 可以在这个 JSON 中使用注释, 方便对接口做一些说明
+{
+    // Visual Stuido Code 支持通过 JSON schema 来验证 JSON 文件的格式并给予提示信息
+    // To understand the structure of JSON files, we use JSON schemas
+    // https://code.visualstudio.com/Docs/languages/json#_json-schemas-settings
+    "$schema": "http://rawgit.com/ufologist/puer-mock/master/_mockserver-schema.json",
+    // 项目的介绍信息
+    "info": {
+        "summary": "微信项目移动网站",
+        "description": "Powered by puer-mock"
+    },
+    // 接口列表
+    "api": {
+        "GET /api/orders": {
+            "info": {
+                "summary": "订单列表",
+                "module": "订单",
+                "description": "获取订单列表",
+                "author": "Sun"
+            },
+            "request": {
+                "querystring": {
+                    "status": 1
+                }
+            },
+            "response": {
+                "status": 0,
+                "statusInfo": {
+                    "message": "ok"
+                },
+                "orderList|20": [
+                    {
+                        "orderId": "@string('0123456789', 6)",
+                        "time": "@datetime('yyyy-MM-dd HH:mm')",
+                        "start": "@region",
+                        "end": "@region",
+                        "number": "@integer(60,100)",
+                        "status": "@integer(1,3)"
+                    }
+                ]
+            }
+        }
+    }
+}

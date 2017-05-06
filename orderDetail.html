@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+	<title>航班详情</title>
+	<link rel="stylesheet" href="./style/weui.min.css" />
+	<link rel="stylesheet" href="./style/index.css" />
+	<style>
+		.weui-btn.weui-btn_primary {
+			background-color: #4395ff;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="page">
+		<div class="page__bd">
+			<div class="weui-cells">
+				<div class="option weui-cell weui-cells_radio weui-cell">
+					<div class="item title">区域</div>
+					<div class="item" id="zone">
+					</div>
+				</div>
+				<div class="option weui-cell weui-cells_radio">
+					<div class="item title">团散</div>
+					<div class="item" id="group">
+					</div>
+				</div>
+				<div class="option weui-cell weui-cells_radio">
+					<div class="item title">人员</div>
+					<div class="item" id="people">
+					</div>
+				</div>
+
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label for="" class="weui-label">开始日期</label></div>
+					<div class="weui-cell__bd" id="startDate">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label for="" class="weui-label">结束日期</label></div>
+					<div class="weui-cell__bd" id="endDate">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">旅行社城市</label></div>
+					<div class="weui-cell__bd" id="travelAgencyCity">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">旅行社名称</label></div>
+					<div class="weui-cell__bd" id="travelAgencyName">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">出发城市</label></div>
+					<div class="weui-cell__bd" id="startCity">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">到达城市</label></div>
+					<div class="weui-cell__bd" id="endCity">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">返程天数</label></div>
+					<div class="weui-cell__bd" id="days">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">出行人数</label></div>
+					<div class="weui-cell__bd" id="number">
+					</div>
+				</div>
+				<div class="weui-cell">
+					<div class="weui-cell__hd"><label class="weui-label">儿童人数</label></div>
+					<div class="weui-cell__bd" id="child">
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="weui-btn-area">
+			<button type="button" class="weui-btn weui-btn_primary" id="showTooltips">供应商报价</button>
+		</div>
+	</div>
+	<div class="js_dialog" id="iosDialog" style="display: none;">
+		<div class="weui-mask"></div>
+		<div class="weui-dialog">
+			<div class="weui-dialog__bd" id="message"></div>
+			<div class="weui-dialog__ft">
+				<a href="javascript:;" class="weui-dialog__btn weui-dialog__btn_primary" id="hideDialog">知道了</a>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="./script/zepto.min.js"></script>
+	<script type="text/javascript" src="./script/fx.js"></script>
+	<script type="text/javascript" src="./script/fx_methods.js"></script>
+	<script type="text/javascript" src="https://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+	<script src="https://res.wx.qq.com/open/libs/weuijs/1.0.0/weui.min.js"></script>
+	<script type="text/javascript" src="./script/mock.js"></script>
+	<script>
+		Mock.mock('/api/order', {
+			"zone": "@integer(0,1)",
+			"group": "@integer(0,1)",
+			"people": "@natural(0,100)",
+			"startTime": "@now('day', 'yyyy-MM-dd')",
+			"endTime": "@now('day', 'yyyy-MM-dd')",
+			"travelAgencyCity": "@region",
+			"travelAgencyName": "@word",
+			"startCity": "@region",
+			"endCity": "@region",
+			"days": "@natural(0,100)",
+			"number": "@natural(50,100)",
+			"child": "@natural(0,50)",
+		})
+	</script>
+	<script type="text/javascript">
+		// 弹出框
+		function showMessage(info) {
+			$("#message").text(info);
+			$("#iosDialog").fadeIn(200);
+		}
+
+		$("#hideDialog").on('click', function () {
+			$("#iosDialog").fadeOut(200);
+		})
+
+		// 获取参数
+		function getQueryString(name) {
+
+			var result = location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
+
+			if (result == null || result.length < 1) {
+				return "";
+			}
+			return decodeURI(result[1]);
+		}
+
+		$("#showTooltips").on('click', function () {
+			window.location.href = 'supplierQuo.html';
+		})
+		$(document).ready(function () {
+			var orderId = getQueryString("id");
+			$.ajax({
+				type: 'GET',
+				url: '/api/order',
+				data: { orderId: orderId },
+				dataType: 'json',
+				timeout: 300,
+				success: function (data) {
+					$("#zone").text(data.zone ? '国内' : '国外');
+					$("#group").text(data.group ? '散客' : '团队');
+					$("#people").text(data.group ? '计调' : '员工');
+					$("#startDate").text(data.startTime);
+					$("#endDate").text(data.endTime);
+					$("#travelAgencyCity").text(data.travelAgencyCity);
+					$("#travelAgencyName").text(data.travelAgencyName);
+					$("#startCity").text(data.startCity);
+					$("#endCity").text(data.endCity);
+					$("#days").text(data.days);
+					$("#number").text(data.number);
+					$("#child").text(data.child);
+				}
+			});
+
+		});
+	</script>
+
+</body>
+
+</html>

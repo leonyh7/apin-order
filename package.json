@@ -1,7 +1,4 @@
 {
-  "devDependencies": {
-    "puer-mock": "^1.2.0"
-  },
   "name": "weui",
   "version": "1.0.0",
   "main": "_mockserver.js",
@@ -16,7 +13,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "puer -a _mockserver.js -p 8000"
+    "dev": "puer -p 8000"
   },
   "author": "",
   "license": "ISC",
